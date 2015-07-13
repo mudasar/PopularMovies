@@ -101,22 +101,34 @@ Log.e(LOG_TAG,apiUrl);
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
                 for(int i=0; i < resultsArray.length(); i++){
-                    Movie movie = new Movie();
                     JSONObject jsonMovie = resultsArray.getJSONObject(i);
 
-                    movie.setTitle(jsonMovie.getString("original_title"));
-                    movie.setPlot(jsonMovie.getString("overview"));
-                    movie.setUserRating(jsonMovie.getDouble("vote_average"));
-                    movie.setPosterPath(jsonMovie.getString("poster_path"));
-                    movie.setId(jsonMovie.getLong("id"));
-                    movie.setReleaseDate(jsonMovie.getString("release_date"));
-                    JSONArray genreArray = jsonMovie.getJSONArray("genre_ids");
+                    Movie movie = new Movie(
+                            jsonMovie.getString("original_title"),
+                            jsonMovie.getLong("id"),
+                            jsonMovie.getString("poster_path"),
+                            "",
+                            jsonMovie.getString("overview"),
+                            jsonMovie.getDouble("vote_average"),
+
+                            jsonMovie.getString("release_date")
+                    );
+
+
+
+//                    movie.setTitle(jsonMovie.getString("original_title"));
+//                    movie.setPlot(jsonMovie.getString("overview"));
+//                    movie.setUserRating(jsonMovie.getDouble("vote_average"));
+//                    movie.setPosterPath(jsonMovie.getString("poster_path"));
+//                    movie.setId(jsonMovie.getLong("id"));
+//                    movie.setReleaseDate(jsonMovie.getString("release_date"));
+//                    JSONArray genreArray = jsonMovie.getJSONArray("genre_ids");
                     String genreIdList = "";
 //                    for (int j = 0; j<genreArray.length()  ; j++){
 //                        int genreId = genreArray.getInt(i);
 //                        genreIdList += genreId + ",";
 //                    }
-                    movie.setGenre(genreIdList);
+//                    movie.setGenre(genreIdList);
 
                     movieList.add(movie);
                 }

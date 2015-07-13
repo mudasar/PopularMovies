@@ -1,9 +1,13 @@
 package uk.appinvent.popularmovies;
 
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.GridView;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -23,6 +27,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -31,6 +40,9 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(settingsIntent);
+
             return true;
         }
 
