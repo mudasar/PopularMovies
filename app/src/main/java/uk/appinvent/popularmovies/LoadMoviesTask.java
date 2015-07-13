@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,29 +108,12 @@ Log.e(LOG_TAG,apiUrl);
                             jsonMovie.getString("original_title"),
                             jsonMovie.getLong("id"),
                             jsonMovie.getString("poster_path"),
-                            "",
+                            "genre",
                             jsonMovie.getString("overview"),
                             jsonMovie.getDouble("vote_average"),
 
-                            jsonMovie.getString("release_date")
+                             jsonMovie.getString("release_date")
                     );
-
-
-
-//                    movie.setTitle(jsonMovie.getString("original_title"));
-//                    movie.setPlot(jsonMovie.getString("overview"));
-//                    movie.setUserRating(jsonMovie.getDouble("vote_average"));
-//                    movie.setPosterPath(jsonMovie.getString("poster_path"));
-//                    movie.setId(jsonMovie.getLong("id"));
-//                    movie.setReleaseDate(jsonMovie.getString("release_date"));
-//                    JSONArray genreArray = jsonMovie.getJSONArray("genre_ids");
-                    String genreIdList = "";
-//                    for (int j = 0; j<genreArray.length()  ; j++){
-//                        int genreId = genreArray.getInt(i);
-//                        genreIdList += genreId + ",";
-//                    }
-//                    movie.setGenre(genreIdList);
-
                     movieList.add(movie);
                 }
                 return movieList;
@@ -141,4 +125,6 @@ Log.e(LOG_TAG,apiUrl);
 
         return null;
     }
+
+
 }

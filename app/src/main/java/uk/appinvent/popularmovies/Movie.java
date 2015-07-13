@@ -6,7 +6,7 @@ import android.os.Parcelable;
 /**
  * Created by mudasar on 10/07/2015.
  */
-public class Movie implements Parcelable {
+public class Movie implements Parcelable  {
 
     // original title
      String title;
@@ -82,6 +82,29 @@ public class Movie implements Parcelable {
         this.releaseDate = releaseDate;
     }
 
+
+
+    public Movie(String title, long id, String posterPath, String genre, String plot, double userRating, String releaseDate) {
+        this.title = title;
+        this.id = id;
+        this.posterPath = posterPath;
+        this.genre = genre;
+        this.plot = plot;
+        this.userRating = userRating;
+        this.releaseDate = releaseDate;
+    }
+
+    public Movie(Parcel in){
+        this.id = in.readLong();
+        this.title = in.readString();
+        this.releaseDate = in.readString();
+        this.userRating = in.readDouble();
+        this.plot = in.readString();
+        this.posterPath = in.readString();
+        this.genre = in.readString();
+    }
+
+
     /**
      * Describe the kinds of special objects contained in this Parcelable's
      * marshalled representation.
@@ -103,61 +126,20 @@ public class Movie implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeString(title);
-        dest.writeString(genre);
-        dest.writeString(posterPath);
-        dest.writeString(plot);
-        dest.writeString(releaseDate);
-        dest.writeDouble(userRating);
-        dest.writeLong(id);
+        dest.writeLong(this.id);
+        dest.writeString(this.title);
+        dest.writeString(this.releaseDate);
+        dest.writeDouble(this.userRating);
+        dest.writeString(this.plot);
+        dest.writeString(this.posterPath);
+        dest.writeString(this.genre);
     }
 
-
-    public Movie(String title, long id, String posterPath, String genre, String plot, double userRating, String releaseDate) {
-        this.title = title;
-        this.id = id;
-        this.posterPath = posterPath;
-        this.genre = genre;
-        this.plot = plot;
-        this.userRating = userRating;
-        this.releaseDate = releaseDate;
-    }
-
-    public Movie(Parcel in){
-        this.id = in.readLong();
-        this.title = in.readString();
-        this.genre = in.readString();
-        this.releaseDate = in.readString();
-        this.userRating = in.readDouble();
-        this.plot = in.readString();
-        this.posterPath = in.readString();
-
-    }
-
-    public class MovieCreator implements Parcelable.Creator<Movie>{
-
-        /**
-         * Create a new instance of the Parcelable class, instantiating it
-         * from the given Parcel whose data had previously been written by
-         * {@link android.os.Parcelable#writeToParcel Parcelable.writeToParcel()}.
-         *
-         * @param source The Parcel to read the object's data from.
-         * @return Returns a new instance of the Parcelable class.
-         */
-        @Override
-        public Movie createFromParcel(Parcel source) {
-            return new Movie(source);
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
         }
 
-        /**
-         * Create a new array of the Parcelable class.
-         *
-         * @param size Size of the array.
-         * @return Returns an array of the Parcelable class, with every entry
-         * initialized to null.
-         */
-        @Override
         public Movie[] newArray(int size) {
             return new Movie[size];
         }

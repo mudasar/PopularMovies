@@ -48,6 +48,8 @@ public class MainActivityFragment extends Fragment {
     public MainActivityFragment() {
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +80,13 @@ public class MainActivityFragment extends Fragment {
         super.onStart();
         updateMovies();
     }
+
+    // I used this method to refresh the movies list but it's a little slow if we try try to scroll the list it happens quickly. I am unable to figure out why its like this.
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        updateMovies();
+//    }
 
     private void updateMovies(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -143,12 +152,16 @@ public class MainActivityFragment extends Fragment {
 //                toast.setGravity(Gravity.BOTTOM | Gravity.LEFT, 0,10);
 //                toast.show();
 
+
                 Intent detailIntent = new Intent(appContext,DetailsActivity.class);
-                detailIntent.putExtra("title",movie.title);
-                detailIntent.putExtra("plot",movie.plot);
-                detailIntent.putExtra("poster",movie.posterPath);
-                detailIntent.putExtra("id",movie.id);
-                detailIntent.putExtra("releasedate",movie.releaseDate);
+//                detailIntent.putExtra("title",movie.title);
+//                detailIntent.putExtra("plot",movie.plot);
+//                detailIntent.putExtra("poster",movie.posterPath);
+//                detailIntent.putExtra("id",movie.id);
+//                detailIntent.putExtra("releasedate",movie.releaseDate);
+//                detailIntent.putExtra("rating",movie.userRating);
+
+                detailIntent.putExtra("movie", movie);
 
                 startActivity(detailIntent);
 
