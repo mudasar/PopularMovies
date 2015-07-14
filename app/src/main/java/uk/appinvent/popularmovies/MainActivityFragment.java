@@ -1,5 +1,6 @@
 package uk.appinvent.popularmovies;
 
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements OnTaskCompleted {
 
     private static final String LOG_TAG = MainActivityFragment.class.getName();
     public static final String DETAIL_ID = "DETAIL_ID";
@@ -43,17 +44,27 @@ public class MainActivityFragment extends Fragment {
     private final static String API_KEY ="d1ef9dc0336bed3f42aa90354fdc4abf";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 
-     ImageAdapter imageAdapter;
+    private String api_method;
+    SharedPreferences preferences;
+    ImageAdapter imageAdapter;
+    ArrayList<Movie> movies = new ArrayList<Movie>();
 
     public MainActivityFragment() {
     }
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
+        if (savedInstanceState != null){
+            movies = savedInstanceState.getParcelableArrayList("movies");
+            //Automatic refresh of movies list after setting is updated
+            String savedApiMethod = savedInstanceState.getString("api_method");
+            autoRefreshMovies(savedApiMethod);
+        }else {
+            executeAsyncTask();
+        }
         setHasOptionsMenu(true);
     }
 
@@ -69,7 +80,7 @@ public class MainActivityFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            updateMovies();
+            executeAsyncTask();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -78,49 +89,69 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        autoRefreshMovies(api_method);
         updateMovies();
     }
 
-    // I used this method to refresh the movies list but it's a little slow if we try try to scroll the list it happens quickly. I am unable to figure out why its like this.
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        updateMovies();
-//    }
-
-    private void updateMovies(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        String api_method =    preferences.getString(getString(R.string.sort_order_key),"popular");
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("movies", movies);
+        outState.putString("api_method",api_method);
+        super.onSaveInstanceState(outState);
+    }
 
 
-        LoadMoviesTask loadMoviesTask = new LoadMoviesTask();
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null){
+            movies = savedInstanceState.getParcelableArrayList("movies");
+        }
+    }
+
+    private void autoRefreshMovies(String savedApiMethod){
+
+        String configApiMethod = preferences.getString(getString(R.string.sort_order_key),"popular");
+        if (savedApiMethod != null && savedApiMethod != configApiMethod){
+            executeAsyncTask();
+        }
+    }
+
+    private String makeUrl(){
+
+
+        api_method =    preferences.getString(getString(R.string.sort_order_key),"popular");
+
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https");
         builder.authority(API_BASE_URL);
         builder.appendEncodedPath(API_URL + api_method);
         builder.appendQueryParameter("api_key", API_KEY);
         Uri url = builder.build();
+        return url.toString();
+    }
 
-        AsyncTask<String, String, List<Movie>> task = loadMoviesTask.execute(url.toString());
-        List<Movie> movies = new ArrayList<Movie>();
-        try {
-            movies =  task.get();
-            if (movies != null) {
-                for (Movie movie : movies) {
-                    //set image path
-                    movie.setPosterPath(IMAGE_BASE_URL + "w500" + movie.getPosterPath());
-                }
-                imageAdapter.moviesList.clear();
-                imageAdapter.moviesList.addAll(movies);
+    private void executeAsyncTask(){
+        LoadMoviesTask loadMoviesTask = new LoadMoviesTask(this);
+        AsyncTask<String, String, ArrayList<Movie>> task = loadMoviesTask.execute(makeUrl());
+
+    }
+
+    private void updateMovies(){
+        if (movies != null) {
+            for (Movie movie : movies) {
+                //set image path
+                movie.setPosterPath(IMAGE_BASE_URL + "w500" + movie.getPosterPath());
             }
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            imageAdapter.moviesList.clear();
+            imageAdapter.moviesList.addAll(movies);
         }
-
     }
 
     @Override
@@ -136,9 +167,6 @@ public class MainActivityFragment extends Fragment {
         List<Movie> movies = new ArrayList<Movie>();
 
 
-
-
-
         imageAdapter = new ImageAdapter(appContext, movies);
 
         gridview.setAdapter(imageAdapter);
@@ -146,25 +174,11 @@ public class MainActivityFragment extends Fragment {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie =(Movie) imageAdapter.getItem(position);
-
-//                Toast toast = Toast.makeText(appContext,movie.getTitle() + " was clicked",Toast.LENGTH_SHORT);
-//                toast.setGravity(Gravity.BOTTOM | Gravity.LEFT, 0,10);
-//                toast.show();
-
-
-                Intent detailIntent = new Intent(appContext,DetailsActivity.class);
-//                detailIntent.putExtra("title",movie.title);
-//                detailIntent.putExtra("plot",movie.plot);
-//                detailIntent.putExtra("poster",movie.posterPath);
-//                detailIntent.putExtra("id",movie.id);
-//                detailIntent.putExtra("releasedate",movie.releaseDate);
-//                detailIntent.putExtra("rating",movie.userRating);
-
+                Movie movie = (Movie) imageAdapter.getItem(position);
+                Intent detailIntent = new Intent(appContext, DetailsActivity.class);
                 detailIntent.putExtra("movie", movie);
 
                 startActivity(detailIntent);
-
             }
         });
 
@@ -172,5 +186,11 @@ public class MainActivityFragment extends Fragment {
     }
 
 
-
+    @Override
+    public void onTaskCompleted(ArrayList<Movie> movieList) {
+        movies = movieList;
+        updateMovies();
+        // Have to call explicitly to make it work on first load
+        imageAdapter.notifyDataSetChanged();
+    }
 }

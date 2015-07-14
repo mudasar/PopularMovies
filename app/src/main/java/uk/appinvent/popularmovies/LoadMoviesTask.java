@@ -20,9 +20,15 @@ import java.util.List;
 /**
  * Created by mudasar on 10/07/2015.
  */
-public class LoadMoviesTask extends AsyncTask<String,String, List<Movie>> {
+public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
 
     private static final String LOG_TAG = LoadMoviesTask.class.getName();
+    private OnTaskCompleted listener;
+
+    public LoadMoviesTask(OnTaskCompleted listener) {
+        this.listener = listener;
+    }
+
     /**
      * Override this method to perform a computation on a background thread. The
      * specified parameters are the parameters passed to {@link #execute}
@@ -38,7 +44,7 @@ public class LoadMoviesTask extends AsyncTask<String,String, List<Movie>> {
      * @see #publishProgress
      */
     @Override
-    protected List<Movie> doInBackground(String... params) {
+    protected ArrayList<Movie> doInBackground(String... params) {
 
 
 
@@ -97,7 +103,7 @@ Log.e(LOG_TAG,apiUrl);
 
         if (jsonData != null){
             try {
-                List<Movie> movieList = new ArrayList<Movie>();
+                ArrayList<Movie> movieList = new ArrayList<Movie>();
 
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
@@ -126,5 +132,20 @@ Log.e(LOG_TAG,apiUrl);
         return null;
     }
 
-
+    /**
+     * <p>Runs on the UI thread after {@link #doInBackground}. The
+     * specified result is the value returned by {@link #doInBackground}.</p>
+     * <p/>
+     * <p>This method won't be invoked if the task was cancelled.</p>
+     *
+     * @param movies The result of the operation computed by {@link #doInBackground}.
+     * @see #onPreExecute
+     * @see #doInBackground
+     * @see #onCancelled(Object)
+     */
+    @Override
+    protected void onPostExecute(ArrayList<Movie> movies) {
+        super.onPostExecute(movies);
+        listener.onTaskCompleted(movies);
+    }
 }
